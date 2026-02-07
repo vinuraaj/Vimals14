@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine? 💜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+            pointer-events: none;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+            border-radius: 20px;
+        }
+
+        .container-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 {
+            color: #764ba2;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            line-height: 1.4;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .yes-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .yes-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4);
+        }
+
+        .no-btn {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .no-btn:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .response {
+            margin-top: 2rem;
+            font-size: 1.5rem;
+            color: #764ba2;
+            font-weight: bold;
+            display: none;
+        }
+
+        .butterfly {
+            position: absolute;
+            font-size: 2rem;
+            cursor: pointer;
+            animation: fly linear infinite;
+            z-index: 5;
+            transition: transform 0.2s;
+        }
+
+        .butterfly:hover {
+            transform: scale(1.3);
+        }
+
+        @keyframes fly {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, -100px) rotate(90deg);
+            }
+            50% {
+                transform: translate(200px, 0) rotate(180deg);
+            }
+            75% {
+                transform: translate(100px, 100px) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #764ba2;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .butterfly {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="questionContainer">
+        <div class="container-content">
+            <h1>Will you be my Valentine? 💜</h1>
+            
+            <div class="button-container">
+                <button class="yes-btn" onclick="submitAnswer('yes')">Yes! 💕</button>
+                <button class="no-btn" onclick="submitAnswer('no')">No</button>
+            </div>
+            
+            <div class="response" id="response"></div>
+        </div>
+    </div>
+
+    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 5; pointer-events: none;">
+        <h2 style="color: white; font-size: 2rem; text-shadow: 2px 2px 10px rgba(0,0,0,0.3); animation: pulse 2s infinite;" id="instruction">
+            Click a purple butterfly 🦋
+        </h2>
+    </div>
+
+    <script>
+        // Array of background images
+        const backgroundImages = [
+            'image1.jpg',
+            'image2.jpg'
+        ];
+
+        // Create butterflies
+        const butterflyEmojis = ['🦋', '🦋', '🦋'];
+        const butterflyCount = 15;
+
+        function createButterfly() {
+            const butterfly = document.createElement('div');
+            butterfly.className = 'butterfly';
+            butterfly.textContent = butterflyEmojis[Math.floor(Math.random() * butterflyEmojis.length)];
+            
+            // Random starting position
+            butterfly.style.left = Math.random() * window.innerWidth + 'px';
+            butterfly.style.top = Math.random() * window.innerHeight + 'px';
+            
+            // Random animation duration
+            butterfly.style.animationDuration = (5 + Math.random() * 10) + 's';
+            
+            // Random delay
+            butterfly.style.animationDelay = Math.random() * 5 + 's';
+            
+            // Add click event to show the question
+            butterfly.addEventListener('click', function() {
+                const container = document.getElementById('questionContainer');
+                const instruction = document.getElementById('instruction');
+                
+                if (!container.classList.contains('visible')) {
+                    // Select random background image
+                    const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+                    container.style.backgroundImage = `url('${randomImage}')`;
+                    
+                    container.classList.add('visible');
+                    if (instruction) {
+                        instruction.style.display = 'none';
+                    }
+                }
+            });
+            
+            document.body.appendChild(butterfly);
+        }
+
+        // Create multiple butterflies
+        for (let i = 0; i < butterflyCount; i++) {
+            createButterfly();
+        }
+
+        // Handle answer submission
+        function submitAnswer(answer) {
+            const responseDiv = document.getElementById('response');
+            const buttons = document.querySelector('.button-container');
+            
+            if (answer === 'yes') {
+                responseDiv.innerHTML = '🎉 Yay! You made my day! 💜✨';
+                responseDiv.style.color = '#764ba2';
+                document.body.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+                
+                // Create heart rain
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => createHeart(), i * 100);
+                }
+            } else {
+                responseDiv.innerHTML = '💔 That\'s okay... maybe next time?';
+                responseDiv.style.color = '#999';
+            }
+            
+            responseDiv.style.display = 'block';
+            buttons.style.display = 'none';
+        }
+
+        // Create falling hearts for yes response
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.textContent = '💜';
+            heart.style.position = 'absolute';
+            heart.style.left = Math.random() * window.innerWidth + 'px';
+            heart.style.top = '-50px';
+            heart.style.fontSize = '2rem';
+            heart.style.zIndex = '100';
+            heart.style.animation = 'fall 3s linear';
+            
+            document.body.appendChild(heart);
+            
+            setTimeout(() => heart.remove(), 3000);
+        }
+
+        // Add fall animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                to {
+                    top: ${window.innerHeight + 50}px;
+                    transform: rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
